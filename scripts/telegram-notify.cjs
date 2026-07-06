@@ -7,7 +7,15 @@ const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 const BEFORE_SHA = process.env.BEFORE_SHA;
 const FORCE_LATEST = process.env.FORCE_LATEST === "true";
+const SEND_ALL = process.env.SEND_ALL === "true";
 const DRY_RUN = process.env.TELEGRAM_DRY_RUN === "1";
+const CATEGORY_TAGS = {
+  sport: "#спорт",
+  showbiz: "#шоубизнес",
+  politics: "#политика",
+  corporations: "#корпорации",
+  war: "#война",
+};
 
 function readNewsFromSource(source, label) {
   const context = {
@@ -65,12 +73,25 @@ function articleUrl(newsItem) {
   return `${SITE_URL}/article.html?id=${encodeURIComponent(newsItem.id)}`;
 }
 
+function chronologicalNews(items) {
+  return [...items].sort((a, b) => {
+    const dateDelta = new Date(`${a.date}T12:00:00`) - new Date(`${b.date}T12:00:00`);
+    if (dateDelta !== 0) return dateDelta;
+    return a.id.localeCompare(b.id);
+  });
+}
+
+function tagsFor(newsItem) {
+  return ["#ХанганДейли", CATEGORY_TAGS[newsItem.category]].filter(Boolean).join(" ");
+}
+
 function captionFor(newsItem) {
   const url = articleUrl(newsItem);
   const title = escapeHtml(newsItem.title);
   const summary = escapeHtml(newsItem.summary);
+  const tags = tagsFor(newsItem);
 
-  return `<b>${title}</b>\n\n${summary}\n\n<a href="${url}">Читать новость</a>`;
+  return `<b>${title}</b>\n\n${summary}\n\n<a href="${url}">Читать новость</a>\n\n${tags}`;
 }
 
 async function telegramRequest(method, payload) {
@@ -122,13 +143,13 @@ async function main() {
   const current = readCurrentNews();
   const old = readOldNews();
   const oldIds = new Set(old.news.map((item) => item.id));
-  let added = current.news.filter((item) => !oldIds.has(item.id));
+  let added = SEND_ALL ? chronologicalNews(current.news) : current.news.filter((item) => !oldIds.has(item.id));
 
   if (!added.length && FORCE_LATEST) {
     added = [current.getSortedNews(current.news)[0]].filter(Boolean);
   }
 
-  added = current.getSortedNews(added);
+  added = SEND_ALL ? chronologicalNews(added) : current.getSortedNews(added);
 
   if (!added.length) {
     console.log("No new news to send.");

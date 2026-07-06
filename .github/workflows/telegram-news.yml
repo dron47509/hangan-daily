@@ -12,6 +12,10 @@ on:
         description: "Send the latest news even if it was already published"
         required: false
         default: "false"
+      send_all:
+        description: "Send all current news from oldest to newest"
+        required: false
+        default: "false"
 
 jobs:
   notify:
@@ -30,3 +34,4 @@ jobs:
           SITE_URL: https://dron47509.github.io/hangan-daily
           BEFORE_SHA: ${{ github.event.before }}
           FORCE_LATEST: ${{ github.event.inputs.send_latest == 'true' }}
+          SEND_ALL: ${{ github.event.inputs.send_all == 'true' || contains(github.event.head_commit.message, '[telegram-all]') }}
