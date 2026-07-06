@@ -370,14 +370,16 @@ main {
   font-family: Georgia, "Times New Roman", serif;
   line-height: 1.08;
   letter-spacing: 0;
+  hyphens: auto;
+  overflow-wrap: break-word;
 }
 
 .lead-card h2 {
-  font-size: clamp(2rem, 4vw, 3.7rem);
+  font-size: clamp(1.8rem, 3.15vw, 3rem);
 }
 
 .news-card h3 {
-  font-size: 1.22rem;
+  font-size: clamp(1.05rem, 1.45vw, 1.22rem);
 }
 
 .summary {
@@ -420,6 +422,8 @@ main {
   font-size: clamp(2.2rem, 6vw, 4.8rem);
   line-height: 0.98;
   letter-spacing: 0;
+  hyphens: auto;
+  overflow-wrap: break-word;
 }
 
 .article-summary {
