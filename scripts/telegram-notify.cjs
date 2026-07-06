@@ -8,6 +8,9 @@ const CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 const BEFORE_SHA = process.env.BEFORE_SHA;
 const FORCE_LATEST = process.env.FORCE_LATEST === "true";
 const SEND_ALL = process.env.SEND_ALL === "true";
+const WAIT_FOR_SITE = process.env.WAIT_FOR_SITE === "true";
+const SITE_WAIT_TIMEOUT_MS = Number(process.env.SITE_WAIT_TIMEOUT_MS || 10 * 60 * 1000);
+const SITE_WAIT_INTERVAL_MS = Number(process.env.SITE_WAIT_INTERVAL_MS || 10 * 1000);
 const DRY_RUN = process.env.TELEGRAM_DRY_RUN === "1";
 const CATEGORY_TAGS = {
   sport: "#спорт",
@@ -96,6 +99,55 @@ function captionFor(newsItem) {
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function publishedNewsIds() {
+  const url = `${SITE_URL}/scripts/news.js?v=${Date.now()}`;
+  const response = await fetch(url, {
+    headers: {
+      "Cache-Control": "no-cache",
+      Pragma: "no-cache",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Could not fetch published news: ${response.status} ${response.statusText}`);
+  }
+
+  const source = await response.text();
+  return new Set(readNewsFromSource(source, url).news.map((item) => item.id));
+}
+
+async function waitForSitePublication(newsItems) {
+  if (!WAIT_FOR_SITE || DRY_RUN || SEND_ALL) return;
+
+  const expectedIds = newsItems.map((item) => item.id);
+  if (!expectedIds.length) return;
+
+  const deadline = Date.now() + SITE_WAIT_TIMEOUT_MS;
+  let lastError = "";
+
+  while (Date.now() < deadline) {
+    try {
+      const publishedIds = await publishedNewsIds();
+      const missing = expectedIds.filter((id) => !publishedIds.has(id));
+
+      if (!missing.length) {
+        console.log(`Published site has news id(s): ${expectedIds.join(", ")}`);
+        return;
+      }
+
+      lastError = `missing id(s): ${missing.join(", ")}`;
+      console.log(`Waiting for GitHub Pages publication, ${lastError}`);
+    } catch (error) {
+      lastError = error.message;
+      console.log(`Waiting for GitHub Pages publication, ${lastError}`);
+    }
+
+    await sleep(SITE_WAIT_INTERVAL_MS);
+  }
+
+  throw new Error(`Timed out waiting for GitHub Pages publication: ${lastError}`);
 }
 
 function truncateCaption(caption) {
@@ -202,6 +254,7 @@ async function main() {
     return;
   }
 
+  await waitForSitePublication(added);
   await sendNewsBatch(added, current.images);
 }
 

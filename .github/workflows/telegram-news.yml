@@ -37,3 +37,6 @@ jobs:
           BEFORE_SHA: ${{ github.event.before }}
           FORCE_LATEST: ${{ github.event.inputs.send_latest == 'true' }}
           SEND_ALL: ${{ github.event.inputs.send_all == 'true' || contains(github.event.head_commit.message, '[telegram-all]') }}
+          WAIT_FOR_SITE: "true"
+          SITE_WAIT_TIMEOUT_MS: "600000"
+          SITE_WAIT_INTERVAL_MS: "10000"
