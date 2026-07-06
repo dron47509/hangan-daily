@@ -15,3 +15,15 @@
 Для карточки нужны `id`, `title`, `category`, `date`, `city`, `image`, `imageAlt`, `summary` и `body`.
 
 Доступные категории: `sport`, `showbiz`, `politics`, `corporations`, `war`.
+
+## Telegram-уведомления
+
+После push в `main` GitHub Actions сравнивает старый и новый `scripts/news.js`.
+Если появились новые `id`, бот отправляет в Telegram заголовок, краткое описание, ссылку на статью и картинку.
+
+Нужно добавить в GitHub repository secrets:
+
+- `TELEGRAM_BOT_TOKEN` — токен от BotFather.
+- `TELEGRAM_CHAT_ID` — id канала, группы или чата.
+
+Бот должен быть добавлен в канал или группу и иметь право публиковать сообщения.

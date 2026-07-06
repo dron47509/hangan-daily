@@ -1,0 +1,32 @@
+name: Telegram news notifications
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/news.js"
+  workflow_dispatch:
+    inputs:
+      send_latest:
+        description: "Send the latest news even if it was already published"
+        required: false
+        default: "false"
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Send Telegram notifications
+        run: node scripts/telegram-notify.cjs
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          SITE_URL: https://dron47509.github.io/hangan-daily
+          BEFORE_SHA: ${{ github.event.before }}
+          FORCE_LATEST: ${{ github.event.inputs.send_latest == 'true' }}
