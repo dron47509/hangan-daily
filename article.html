@@ -44,7 +44,11 @@
       <p>Ханган Дейли — внутриигровой сайт для НРИ «Аристократия». Все публикации вымышлены.</p>
     </footer>
 
-    <script src="scripts/news.js"></script>
+    <script>
+      document.write(
+        `<script src="scripts/news.js?v=${Math.floor(Date.now() / 60000)}"><\/script>`,
+      );
+    </script>
     <script src="scripts/article.js"></script>
   </body>
 </html>

@@ -44,7 +44,11 @@
       <p>Изображения загружаются из Wikimedia Commons; ссылки на источники указаны на страницах статей.</p>
     </footer>
 
-    <script src="scripts/news.js"></script>
+    <script>
+      document.write(
+        `<script src="scripts/news.js?v=${Math.floor(Date.now() / 60000)}"><\/script>`,
+      );
+    </script>
     <script src="scripts/app.js"></script>
   </body>
 </html>
