@@ -6,6 +6,8 @@ on:
       - main
     paths:
       - "scripts/news.js"
+      - "scripts/telegram-notify.cjs"
+      - ".github/workflows/telegram-news.yml"
   workflow_dispatch:
     inputs:
       send_latest:

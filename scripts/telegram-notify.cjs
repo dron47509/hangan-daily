@@ -94,10 +94,23 @@ function captionFor(newsItem) {
   return `<b>${title}</b>\n\n${summary}\n\n<a href="${url}">Читать новость</a>\n\n${tags}`;
 }
 
-async function telegramRequest(method, payload) {
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function truncateCaption(caption) {
+  if (caption.length <= 1024) return caption;
+
+  const tagStart = caption.lastIndexOf("\n\n#");
+  const tags = tagStart === -1 ? "" : caption.slice(tagStart);
+  const limit = 1024 - tags.length - 1;
+  return `${caption.slice(0, Math.max(0, limit)).trim()}…${tags}`;
+}
+
+async function telegramRequest(method, payload, attempt = 1) {
   if (DRY_RUN) {
     console.log(JSON.stringify({ method, payload }, null, 2));
-    return;
+    return { ok: true };
   }
 
   if (!BOT_TOKEN || !CHAT_ID) {
@@ -111,9 +124,18 @@ async function telegramRequest(method, payload) {
   });
 
   const result = await response.json();
+  if (response.status === 429 && attempt <= 3) {
+    const retryAfter = Number(result.parameters?.retry_after || 2);
+    console.warn(`Telegram rate limit, retrying ${method} after ${retryAfter}s`);
+    await sleep((retryAfter + 1) * 1000);
+    return telegramRequest(method, payload, attempt + 1);
+  }
+
   if (!response.ok || !result.ok) {
     throw new Error(`Telegram ${method} failed: ${JSON.stringify(result)}`);
   }
+
+  return result;
 }
 
 async function sendNews(newsItem, images) {
@@ -125,18 +147,42 @@ async function sendNews(newsItem, images) {
   };
 
   if (image?.url) {
-    await telegramRequest("sendPhoto", {
-      ...payload,
-      photo: image.url,
-      caption: captionFor(newsItem).slice(0, 1024),
-    });
-    return;
+    try {
+      await telegramRequest("sendPhoto", {
+        ...payload,
+        photo: image.url,
+        caption: truncateCaption(captionFor(newsItem)),
+      });
+      return;
+    } catch (error) {
+      console.warn(`sendPhoto failed for ${newsItem.id}, falling back to sendMessage: ${error.message}`);
+    }
   }
 
   await telegramRequest("sendMessage", {
     ...payload,
     text: captionFor(newsItem),
   });
+}
+
+async function sendNewsBatch(newsItems, images) {
+  const failures = [];
+
+  for (const newsItem of newsItems) {
+    console.log(`Sending Telegram notification: ${newsItem.title}`);
+    try {
+      await sendNews(newsItem, images);
+    } catch (error) {
+      failures.push({ id: newsItem.id, message: error.message });
+      console.error(`Could not send ${newsItem.id}: ${error.message}`);
+    }
+
+    await sleep(1200);
+  }
+
+  if (failures.length) {
+    throw new Error(`Failed to send ${failures.length} news item(s): ${JSON.stringify(failures)}`);
+  }
 }
 
 async function main() {
@@ -156,10 +202,7 @@ async function main() {
     return;
   }
 
-  for (const newsItem of added) {
-    console.log(`Sending Telegram notification: ${newsItem.title}`);
-    await sendNews(newsItem, current.images);
-  }
+  await sendNewsBatch(added, current.images);
 }
 
 main().catch((error) => {
