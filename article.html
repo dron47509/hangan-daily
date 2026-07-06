@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Новость | Ханган Дейли</title>
+    <meta
+      name="description"
+      content="Страница новости игрового сайта Ханган Дейли для настольной ролевой игры Аристократия."
+    >
+    <link rel="stylesheet" href="assets/styles.css">
+  </head>
+  <body>
+    <header class="site-header compact">
+      <div class="topline" aria-label="Служебная строка">
+        <span>Сеул</span>
+        <span>Ханган Дейли</span>
+      </div>
+      <div class="masthead">
+        <a class="brand" href="index.html" aria-label="Ханган Дейли, на главную">
+          <span class="brand-mark">HD</span>
+          <span>
+            <strong>Ханган Дейли</strong>
+          </span>
+        </a>
+        <a class="back-link" href="index.html">Все новости</a>
+      </div>
+    </header>
+
+    <main>
+      <article id="articleRoot" class="article-shell" aria-live="polite"></article>
+      <section class="related-shell" aria-label="Материалы по теме">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Рубрика</p>
+            <h2>Еще по теме</h2>
+          </div>
+        </div>
+        <div id="relatedNews" class="related-grid"></div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>Ханган Дейли — внутриигровой сайт для НРИ «Аристократия». Все публикации вымышлены.</p>
+    </footer>
+
+    <script src="scripts/news.js"></script>
+    <script src="scripts/article.js"></script>
+  </body>
+</html>

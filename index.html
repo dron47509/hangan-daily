@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Ханган Дейли | Новости Республики Корея</title>
+    <meta
+      name="description"
+      content="Игровой новостной сайт для настольной ролевой игры Аристократия: политика, корпорации, спорт, шоубизнес и война в Южной Корее."
+    >
+    <link rel="stylesheet" href="assets/styles.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="topline" aria-label="Служебная строка">
+        <span>Сеул</span>
+        <span>6 июля 2026</span>
+      </div>
+      <div class="masthead">
+        <a class="brand" href="index.html" aria-label="Ханган Дейли, на главную">
+          <span class="brand-mark">HD</span>
+          <span>
+            <strong>Ханган Дейли</strong>
+          </span>
+        </a>
+        <nav class="category-nav" id="categoryNav" aria-label="Рубрики"></nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="lead-grid" id="leadGrid" aria-label="Главные материалы"></section>
+      <section class="section-heading">
+        <div>
+          <p class="eyebrow">Архив</p>
+          <h1>Все новости</h1>
+        </div>
+        <p id="newsCounter" class="muted"></p>
+      </section>
+      <section id="newsGroups" class="news-groups" aria-live="polite"></section>
+    </main>
+
+    <footer class="site-footer">
+      <p>Ханган Дейли — внутриигровой сайт для НРИ «Аристократия». Все публикации вымышлены.</p>
+      <p>Изображения загружаются из Wikimedia Commons; ссылки на источники указаны на страницах статей.</p>
+    </footer>
+
+    <script src="scripts/news.js"></script>
+    <script src="scripts/app.js"></script>
+  </body>
+</html>
